@@ -10,13 +10,17 @@ from scipy.stats import norm
 
 
 class BlackScholes:
-    def __init__(self, spot, strike, r, q, tau, vol):
+    TAG_CALL = "Call"
+    TAG_PUT = "Put"
+    def __init__(self, spot, strike, r, q, tau, vol, payoff):
         self.spot = spot
         self.strike = strike
         self.r = r
         self.q = q
         self.tau = tau
         self.vol = vol
+        assert payoff in [BlackScholes.TAG_CALL, BlackScholes.TAG_PUT], "Unsupported payoff"
+        self.payoff = payoff
 
     def d1(self):
         return (math.log(self.spot / self.strike) + (self.r - self.q + 1 / 2 * self.vol ** 2) * self.tau) / \
@@ -26,6 +30,7 @@ class BlackScholes:
         return self.d1() - self.vol * math.sqrt(self.tau)
 
     def price(self):
-        d1 = self.d1()
-        d2 = self.d2()
-        return self.spot * norm.cdf(d1) * math.exp(-self.q * self.tau) - self.strike * norm.cdf(d2) * math.exp(-self.r * self.tau)
+        if self.payoff == BlackScholes.TAG_CALL:
+            d1 = self.d1()
+            d2 = self.d2()
+            return self.spot * norm.cdf(d1) * math.exp(-self.q * self.tau) - self.strike * norm.cdf(d2) * math.exp(-self.r * self.tau)
